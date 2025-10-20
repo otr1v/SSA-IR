@@ -1,5 +1,3 @@
-// ir.cpp - НОВЫЙ ФАЙЛ
-
 #include <vector>
 
 #include "IR.h"
