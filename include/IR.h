@@ -1,6 +1,7 @@
 #ifndef IR_H
 #define IR_H
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -204,47 +205,25 @@ unsigned getBBId(const BasicBlock* bb);
 
 class BasicBlock final {
    public:
-    BasicBlock(unsigned id, const std::string& name) : id_(id), name_(name) {
-    }
+    BasicBlock(unsigned id, const std::string& name);
 
-    unsigned getId() const {
-        return id_;
-    }
-    const std::string& getName() const {
-        return name_;
-    }
-    const std::vector<std::unique_ptr<Inst>>& getInstructions() const {
-        return instructions_;
-    }
+    unsigned getId() const;
+    const std::string& getName() const;
+    const std::vector<std::unique_ptr<Inst>>& getInstructions() const;
 
-    void addInstruction(std::unique_ptr<Inst> inst) {
-        instructions_.push_back(std::move(inst));
-    }
+    void addInstruction(std::unique_ptr<Inst> inst);
 
-    void addSuccessor(BasicBlock* succ) {
-        successors_.push_back(succ);
-    }
-    void addPredecessor(BasicBlock* pred) {
-        predecessors_.push_back(pred);
-    }
+    void addPredecessor(BasicBlock* pred);
 
-    void dump(std::ostream& os) const {
-        os << "BB" << id_ << " (" << name_ << "):";
-        if (!predecessors_.empty()) {
-            os << "  ; preds = ";
-            for (size_t i = 0; i < predecessors_.size(); ++i) {
-                os << "%BB" << predecessors_[i]->getId()
-                   << (i == predecessors_.size() - 1 ? "" : ", ");
-            }
-        }
-        os << std::endl;
+    const std::vector<BasicBlock*>& getPredecessors() const;
 
-        for (const auto& inst : instructions_) {
-            os << "  ";
-            inst->dump(os);
-            os << std::endl;
-        }
-    }
+    void clearPredecessors();
+
+    Inst* getTerminator() const;
+
+    std::vector<BasicBlock*> getSuccessors() const;
+
+    void dump(std::ostream& os) const;
 
    private:
     unsigned id_;
@@ -253,7 +232,6 @@ class BasicBlock final {
 
     // Control Flow Graph connections
     std::vector<BasicBlock*> predecessors_;
-    std::vector<BasicBlock*> successors_;
 };
 
 inline unsigned getBBId(const BasicBlock* bb) {
@@ -296,14 +274,9 @@ inline void PhiInst::dump(std::ostream& os) const {
 
 class Graph {
    public:
-    Graph(const std::string& name) : name_(name) {
-    }
+    Graph(const std::string& name);
 
-    BasicBlock* createBB(const std::string& name = "") {
-        unsigned id = basic_blocks_.size();
-        basic_blocks_.push_back(std::make_unique<BasicBlock>(id, name));
-        return basic_blocks_.back().get();
-    }
+    BasicBlock* createBB(const std::string& name = "");
 
     template <typename InstType, typename... Args>
     InstType* createInst(BasicBlock* bb, Args&&... args) {
@@ -314,23 +287,15 @@ class Graph {
         return inst_ptr;
     }
 
-    void connectBBs(BasicBlock* from, BasicBlock* to) {
-        from->addSuccessor(to);
-        to->addPredecessor(from);
-    }
+    void buildPredecessors();
 
-    void setStartBlock(BasicBlock* bb) {
-        start_block_ = bb;
-    }
+    void setStartBlock(BasicBlock* bb);
 
-    void dump(std::ostream& os) const {
-        os << "Function Graph: " << name_ << std::endl;
-        os << "----------------------\n";
-        for (const auto& bb : basic_blocks_) {
-            bb->dump(os);
-        }
-        os << "----------------------\n";
-    }
+    BasicBlock* getStartBlock() const;
+
+    const std::vector<std::unique_ptr<BasicBlock>>& getBasicBlocks() const;
+
+    void dump(std::ostream& os) const;
 
    private:
     std::string name_;
