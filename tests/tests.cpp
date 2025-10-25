@@ -113,7 +113,7 @@ BlockMap buildNewExample3(Graph& g) {
 // =============================================================================
 
 TEST(DominatorTreeSuite, CorrectedExample1) {
-    Graph g("Corrected Example 1");
+    Graph g("Example 1");
     BlockMap blocks = buildNewExample1(g);
     
     g.buildPredecessors();
@@ -130,7 +130,7 @@ TEST(DominatorTreeSuite, CorrectedExample1) {
 }
 
 TEST(DominatorTreeSuite, CorrectedExample2) {
-    Graph g("Corrected Example 2");
+    Graph g("Example 2");
     BlockMap blocks = buildNewExample2(g);
     
     g.buildPredecessors();
@@ -151,7 +151,7 @@ TEST(DominatorTreeSuite, CorrectedExample2) {
 }
 
 TEST(DominatorTreeSuite, CorrectedExample3) {
-    Graph g("Corrected Example 3");
+    Graph g("Example 3");
     BlockMap blocks = buildNewExample3(g);
     
     g.buildPredecessors();
